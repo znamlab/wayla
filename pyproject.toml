@@ -1,0 +1,114 @@
+[project]
+name = "wayla"
+authors = [{name = "Znamenskiy lab", email= "antonin.blot@crick.ac.uk"}]
+description = "What are you looking at, a gaze reconstruction package for mice"
+readme = "README.md"
+requires-python = ">=3.9.0"
+dynamic = ["version"]
+
+dependencies = []
+
+license = {text = "MIT"}
+
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/znamlab/wayla"
+"Bug Tracker" = "https://github.com/znamlab/wayla/issues"
+"Documentation" = "https://znamlab.github.io/wayla"
+
+"Source Code" = "https://github.com/znamlab/wayla"
+"User Support" = "https://github.com/znamlab/wayla/issues"
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "coverage",
+  "tox",
+  "black",
+  "mypy",
+  "pre-commit",
+  "ruff",
+  "setuptools_scm",
+]
+
+[build-system]
+requires = [
+    "setuptools>=45",
+    "wheel",
+    "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["wayla*"]
+exclude = ["tests", "docs*"]
+
+
+[tool.pytest.ini_options]
+addopts = "--cov=wayla"
+filterwarnings = [
+    "error",
+]
+
+[tool.black]
+target-version = ['py39', 'py310', 'py311']
+skip-string-normalization = false
+line-length = 79
+
+[tool.setuptools_scm]
+
+[tool.check-manifest]
+ignore = [
+  ".yaml",
+  "tox.ini",
+  "tests/",
+  "tests/test_unit/",
+  "tests/test_integration/",
+  "docs/",
+  "docs/source/",
+]
+
+
+[tool.ruff]
+line-length = 79
+exclude = ["__init__.py","build",".eggs"]
+select = ["I", "E", "F"]
+fix = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{39,310,311}
+isolated_build = True
+
+[gh-actions]
+python =
+    3.9: py39
+    3.10: py310
+    3.11: py311
+
+[testenv]
+extras =
+    dev
+commands =
+    pytest -v --color=yes --cov=wayla --cov-report=xml
+"""
+
+
+[tool.codespell]
+skip = '.git'
+check-hidden = true
