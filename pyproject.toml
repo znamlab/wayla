@@ -6,7 +6,19 @@ readme = "README.md"
 requires-python = ">=3.9.0"
 dynamic = ["version"]
 
-dependencies = []
+dependencies = ["numpy",
+        "pandas",
+        "pathlib",
+        "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git",
+        "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git",
+        "matplotlib",
+        "scipy",
+        "tables",
+        "scikit-learn",
+        "tqdm",
+        "numba",
+        "numba_progress",
+        "scikit-image",]
 
 license = {text = "MIT"}
 
