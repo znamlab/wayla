@@ -3,14 +3,12 @@ name = "wayla"
 authors = [{name = "Znamenskiy lab", email= "antonin.blot@crick.ac.uk"}]
 description = "What are you looking at, a gaze reconstruction package for mice"
 readme = "README.md"
-requires-python = ">=3.9.0"
+requires-python = ">=3.8.0"
 dynamic = ["version"]
 
 dependencies = ["numpy",
         "pandas",
         "pathlib",
-        "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git",
-        "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git",
         "matplotlib",
         "scipy",
         "tables",
@@ -18,7 +16,11 @@ dependencies = ["numpy",
         "tqdm",
         "numba",
         "numba_progress",
-        "scikit-image",]
+        "scikit-image",
+        "opencv-python",
+        "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git",
+        "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git",
+        ]
 
 license = {text = "MIT"}
 
