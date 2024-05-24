@@ -8,4 +8,5 @@ except PackageNotFoundError:
 
 from . import eye_model_fitting
 from . import diagnostics
+from . import eye_tracking
 from .eye_tracking import run_all

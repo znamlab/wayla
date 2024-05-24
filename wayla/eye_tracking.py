@@ -12,8 +12,8 @@ import flexiznam as flz
 import numpy as np
 import pandas as pd
 import yaml
-from cottage_analysis.eye_tracking import diagnostics, eye_io
-from cottage_analysis.eye_tracking import eye_model_fitting as emf
+from . import diagnostics, eye_io
+from . import eye_model_fitting as emf
 from znamutils import slurm_it
 
 envs = flz.PARAMETERS["conda_envs"]
@@ -396,7 +396,6 @@ def dlc_pupil(
             keypoints_only=False,
             trailpoints=0,
             draw_skeleton=True,
-            confidence_to_alpha=True,
         )
     return ds, ds.path_full
 
@@ -523,7 +522,7 @@ def fit_ellipse(
     slurm_options={
         "time": "48:00:00",
         "mem": "64G",
-        "partition": "cpu",
+        "partition": "ncpu",
         "cpus-per-task": 32,
     },
 )

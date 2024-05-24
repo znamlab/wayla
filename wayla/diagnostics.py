@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
-from cottage_analysis.eye_tracking import eye_io, utils
+from . import eye_io, utils
 from cottage_analysis.utilities.plot_utils import get_img_from_fig, write_fig_to_video
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage.measure import EllipseModel
@@ -114,7 +114,7 @@ def plot_dlc_tracking(camera_ds, dlc_ds, likelihood_threshold=None):
         ntasks=1,
         time="72:00:00",
         mem="16G",
-        partition="cpu",
+        partition="ncpu",
     ),
 )
 def plot_ellipse_fit(

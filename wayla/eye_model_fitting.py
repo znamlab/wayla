@@ -10,7 +10,7 @@ import warnings
 import cv2
 import numpy as np
 import pandas as pd
-from cottage_analysis.eye_tracking import diagnostics, eye_io, utils
+from . import diagnostics, eye_io, utils
 from numba_progress import ProgressBar
 from skimage.measure import EllipseModel
 from tqdm import tqdm
