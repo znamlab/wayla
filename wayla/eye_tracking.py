@@ -260,6 +260,7 @@ def dlc_pupil(
     project,
     crop=False,
     conflicts="abort",
+    label_video=False,
 ):
     """Run dlc tracking on a video
 
@@ -274,6 +275,7 @@ def dlc_pupil(
         crop (bool, optional): Whether to crop the video. Defaults to False.
         conflicts (str, optional): How to handle conflicts when creating the dataset on
             flexilims. Defaults to "abort".
+        label_video (bool, optional): Whether to label the video after tracking.
     """
 
     flexilims_session = flz.get_flexilims_session(project)
@@ -387,7 +389,7 @@ def dlc_pupil(
     print("Saving diagnostic plot", flush=True)
     if not crop:
         diagnostics.check_cropping(dlc_ds=ds, camera_ds=camera_ds, conflicts=conflicts)
-    else:
+    elif label_video:
         print("Labelling video")
         deeplabcut.create_labeled_video(
             config=dlc_model_config,
