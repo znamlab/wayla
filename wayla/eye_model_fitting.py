@@ -10,10 +10,11 @@ import warnings
 import cv2
 import numpy as np
 import pandas as pd
-from . import diagnostics, eye_io, utils
 from numba_progress import ProgressBar
 from skimage.measure import EllipseModel
 from tqdm import tqdm
+
+from . import diagnostics, eye_io, utils
 
 
 def fit_ellipses(dlc_res_file, likelihood_threshold=None):
@@ -443,7 +444,7 @@ def convert_to_world(gaze_vec, rvec):
     return rotated_gaze_vec
 
 
-def gaze_to_azel(gaze_vector, zero_median=False, worled_is_mirrored=False):
+def gaze_to_azel(gaze_vector, zero_median=False, world_is_mirrored=False):
     """Transform gaze vectors in world coordinates to Azimuth and Elevation
 
     This assumes that the gaze vector come in the aruco reference frame , with y
@@ -456,14 +457,14 @@ def gaze_to_azel(gaze_vector, zero_median=False, worled_is_mirrored=False):
     Args:
         gaze_vector (numpy.array): N x 3 array of gaze
         zero_median (bool, optional): Subtract the median. Defaults to False.
-        worled_is_mirrored (bool, optional): Whether the world is mirrored. Defaults to
+        world_is_mirrored (bool, optional): Whether the world is mirrored. Defaults to
             False.
 
     Returns:
         azimuth (numpy.array): len(N) array of azimuth in radians in the range [-pi, pi]
         elevation (numpy.array): len(N) array of elevation in radians
     """
-    if worled_is_mirrored:
+    if world_is_mirrored:
         print("Mirrored world")
         gaze_vector[:, :2] *= -1
         gaze_vector = gaze_vector[:, [1, 0, 2]]
