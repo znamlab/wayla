@@ -33,6 +33,7 @@ def get_data(
     Returns:
         panda.DataFrame: DLC results
         panda.DataFrame: Ellipse fits
+        flexiznam.schema.dataset.Dataset: DLC dataset
     """
 
     rec_ds = flz.get_children(
