@@ -12,9 +12,10 @@ import flexiznam as flz
 import numpy as np
 import pandas as pd
 import yaml
+from znamutils import slurm_it
+
 from . import diagnostics, eye_io
 from . import eye_model_fitting as emf
-from znamutils import slurm_it
 
 envs = flz.PARAMETERS["conda_envs"]
 

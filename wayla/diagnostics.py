@@ -7,12 +7,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
-from . import eye_io, utils
 from cottage_analysis.utilities.plot_utils import get_img_from_fig, write_fig_to_video
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage.measure import EllipseModel
 from tqdm import tqdm
 from znamutils import slurm_it
+
+from . import eye_io, utils
 
 
 def check_cropping(dlc_ds, camera_ds, rotate180=False, conflicts="skip"):

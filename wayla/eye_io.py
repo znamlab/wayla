@@ -94,8 +94,8 @@ def get_data(
     ellipse["pupil_y"] = ellipse.centre_y - ellipse.reflection_y
     ellipse.loc[~ellipse.valid, "pupil_x"] = np.nan
     ellipse.loc[~ellipse.valid, "pupil_y"] = np.nan
-    
-    # look for reprojection 
+
+    # look for reprojection
     repro_ds = rec_ds[rec_ds.dataset_type == "eye_reprojection"]
     if len(repro_ds) > 0:
         if len(repro_ds) > 1:
@@ -104,8 +104,8 @@ def get_data(
             name=repro_ds.iloc[0].name, flexilims_session=flexilims_session
         )
         reprojection = np.load(repro_ds.path_full)
-        for i, l in enumerate(['phi', 'theta', 'radius']):
-            ellipse[l] = reprojection[:, i]
+        for i, prop in enumerate(["phi", "theta", "radius"]):
+            ellipse[prop] = reprojection[:, i]
     return dlc_res, ellipse, dlc_ds
 
 
