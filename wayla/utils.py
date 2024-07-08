@@ -467,11 +467,14 @@ def get_gaze_vector(phi, theta):
         theta (float): Angle in radians
 
     Returns:
-        numpy.array: 3-D vector of gaze direction in camera coordinates
+        numpy.array: N x 3, vector(s) of gaze direction in camera coordinates
     """
-    return np.array(
+    gaze_vec = np.array(
         [np.sin(theta), np.sin(phi) * np.cos(theta), -np.cos(phi) * np.cos(theta)]
     )
+    if gaze_vec.ndim == 2:
+        gaze_vec = gaze_vec.T
+    return gaze_vec
 
 
 def fit_circle(x, y):
