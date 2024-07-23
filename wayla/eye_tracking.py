@@ -481,6 +481,20 @@ def fit_ellipse(
     conflicts="skip",
     plot=True,
 ):
+    """Fit ellipses to the DLC tracking results
+
+    Cropped DLC tracking must have been done first. An ellipse is fitted to the eye
+    tracking results.
+
+    Args:
+        camera_ds_name (str): Name of the camera dataset on flexilims
+        project (str): Name of the project on flexilims
+        likelihood_threshold (float, optional): Likelihood threshold for ellipse fitting
+            Defaults to None.
+        conflicts (str, optional): How to handle conflicts when creating the datasets on
+            flexilims. Defaults to "skip".
+        plot (bool, optional): Whether to plot the results. Defaults to True.
+    """
     flexilims_session = flz.get_flexilims_session(project)
     camera_ds = flz.Dataset.from_flexilims(
         name=camera_ds_name, flexilims_session=flexilims_session
@@ -493,22 +507,42 @@ def fit_ellipse(
     assert dlc_file.exists()
 
     target = dlc_ds.path_full / f"{dlc_file.stem}_ellipse_fits.csv"
+    target_ref = dlc_ds.path_full / f"{dlc_file.stem}_reflection_gaussian_fits.csv"
+    do_ellipse_fit = True
     if target.exists():
         if conflicts == "overwrite":
             os.remove(target)
         else:
             print("  Ellipse fit already done. Skip")
-            return target
+            do_ellipse_fit = False
+    do_reflection_fit = True
+    if target_ref.exists():
+        if conflicts == "overwrite":
+            os.remove(target_ref)
+        else:
+            print("  Reflection fit already done. Skip")
+            do_reflection_fit = False
 
-    print("Doing %s" % dlc_file)
-    ellipse_fits = emf.fit_ellipses(
-        dlc_file,
-        likelihood_threshold=likelihood_threshold,
-    )
-    print(f"Fitted, save to {target}")
-    ellipse_fits.to_csv(target, index=False)
+    if do_ellipse_fit:
+        print("Doing %s" % dlc_file)
+        print("Fitting ellipses")
+        ellipse_fits = emf.fit_ellipses(
+            dlc_file,
+            likelihood_threshold=likelihood_threshold,
+        )
+        print(f"Fitted, save to {target}")
+        ellipse_fits.to_csv(target, index=False)
 
-    if plot:
+    if do_reflection_fit:
+        print("Fitting reflection position")
+        reflection_fits = emf.fit_gaussian_on_reflection(
+            camera_ds=camera_ds, window=50, init_sigma=10
+        )
+
+        print(f"Fitted, save to {target_ref}")
+        reflection_fits.to_csv(target_ref, index=False)
+
+    if plot and do_ellipse_fit:
         print("Diagnostic plot")
         diagnostics.plot_ellipse_fit(
             camera_ds_name=camera_ds_name,

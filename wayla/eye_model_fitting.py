@@ -11,10 +11,101 @@ import cv2
 import numpy as np
 import pandas as pd
 from numba_progress import ProgressBar
+from scipy.optimize import curve_fit
 from skimage.measure import EllipseModel
 from tqdm import tqdm
 
 from . import diagnostics, eye_io, utils
+
+
+def fit_gaussian_on_reflection(camera_ds, dlc_data=None, window=50, init_sigma=10):
+    flm_sess = camera_ds.flexilims_session
+    if dlc_data is None:
+        dlc_res, dlc_data, dlc_ds = eye_io.get_data(
+            camera_ds,
+            flexilims_session=flm_sess,
+        )
+
+    dlc_tracks = eye_io.get_tracking_datasets(camera_ds, flexilims_session=flm_sess)
+    crop_info = dlc_tracks["cropped"].extra_attributes["cropping"]
+
+    video_file = camera_ds.path_full / camera_ds.extra_attributes["video_file"]
+
+    def crop_around_reflection(frame, track, crop_info, window=window):
+        """Crop around the reflection
+
+        Args:
+            frame (numpy.array): Frame
+            track (pandas.Series): Tracking data with reflection_x and reflection_y
+            crop_info (numpy.array): Crop information as [xmin, xmax, ymin, ymax]
+            window (int, optional): Window size. Defaults to window.
+
+        Returns:
+            numpy.array: Cropped image
+        """
+        x_lims = np.array([-window, window]) + track.reflection_x + crop_info[0]
+        y_lims = np.array([-window, window]) + track.reflection_y + crop_info[2]
+        x_lims = np.clip(x_lims, 0, frame.shape[1])
+        y_lims = np.clip(y_lims, 0, frame.shape[0])
+        x_lims = x_lims.astype(int)
+        y_lims = y_lims.astype(int)
+
+        img_part = frame[y_lims[0] : y_lims[1], x_lims[0] : x_lims[1]]
+        return img_part
+
+    def gaussian_2d(xy, x0, y0, sigma, A):
+        x, y = xy
+        val = A * np.exp(
+            -((x - x0) ** 2 / (2 * sigma**2) + (y - y0) ** 2 / (2 * sigma**2))
+        )
+        return np.clip(val, 0, 255)
+
+    def fit_gaussian_2d(xy, x0, y0, sigma, A):
+        x, y = xy
+        return gaussian_2d((x, y), x0, y0, sigma, A).ravel()
+
+    video = cv2.VideoCapture(str(video_file))
+    n_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    init_arg = (window, window, init_sigma, 255)
+    x = np.arange(2 * window)
+    y = np.arange(2 * window)
+    X, Y = np.meshgrid(x, y)
+    gaussian_parameters = np.zeros((n_frames, 4))
+    error = np.zeros(n_frames)
+    for i_frame in tqdm(range(n_frames)):
+        track = dlc_data.iloc[i_frame]
+        ret, frame = video.read()
+        assert ret, f"Failed to read frame {i_frame} from video file {video_file}"
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        img_part = crop_around_reflection(frame, track, crop_info, window=50)
+        try:
+            popt, pcov = curve_fit(
+                fit_gaussian_2d,
+                (X, Y),
+                img_part.ravel(),
+                p0=init_arg,
+                bounds=(
+                    [0, 0, 0, 0],
+                    [2 * window, 2 * window, 10 * init_sigma, np.inf],
+                ),
+            )
+        except RuntimeError:
+            popt = np.nan * np.zeros(4)
+        gaussian_parameters[i_frame] = popt
+        error[i_frame] = np.mean(
+            np.abs(img_part.ravel() - fit_gaussian_2d((X, Y), *popt))
+        )
+    video.release()
+
+    # to remember the order, make a dataframe
+    gaussian_parameters = pd.DataFrame(
+        gaussian_parameters,
+        columns=["x0", "y0", "sigma", "A"],
+        index=dlc_data.index,
+    )
+    gaussian_parameters["res"] = error
+
+    return gaussian_parameters
 
 
 def fit_ellipses(dlc_res_file, likelihood_threshold=None):
