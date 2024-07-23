@@ -20,7 +20,7 @@ dependencies = ["numpy",
         "opencv-python",
         "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git",
         "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git",
-        "cottage_analysis @ git+ssh://git@github.com/znamlab/cottage_analysis.git",
+        "image_tools @ git+ssh://git@github.com/znamlab/image-tools.git",
         ]
 
 license = {text = "MIT"}
