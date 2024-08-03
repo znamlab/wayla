@@ -473,7 +473,7 @@ def create_crop_file(camera_ds, dlc_ds, conflicts="skip"):
     return crop_info
 
 
-@slurm_it(conda_env="cottage_analysis")
+@slurm_it(conda_env="eye_tracking")
 def fit_ellipse(
     camera_ds_name,
     project,
@@ -557,7 +557,7 @@ def fit_ellipse(
 @slurm_it(
     conda_env=envs["cottage_analysis"],
     slurm_options={
-        "time": "48:00:00",
+        "time": "12:00:00",
         "mem": "64G",
         "partition": "ncpu",
         "cpus-per-task": 32,

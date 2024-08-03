@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
-from cottage_analysis.utilities.plot_utils import get_img_from_fig, write_fig_to_video
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage.measure import EllipseModel
 from tqdm import tqdm
@@ -786,6 +785,7 @@ def plot_movie(
     else:
         nframes = int(fps * duration)
     cam_data.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+    reflection_df = eye_io.get_reflection(camera_ds=camera, project=camera.project)
     for frame_id in tqdm(np.arange(nframes) + start_frame):
         # set figure
         fig.clear()
@@ -827,9 +827,7 @@ def plot_movie(
         img = gray[slice(*borders[:, 1]), slice(*borders[:, 0])] if recrop else gray
 
         # get reflection
-        track = dlc_res.loc[frame_id]
-        track.index = track.index.droplevel(["scorer"])
-        reflection = track.loc[("reflection", ["x", "y"])].values
+        reflection = reflection_df.loc[frame_id, ["x0", "y0"]].values
 
         # plot image, center on reflection if needed
         for ax, use_ref in zip(axes, sub_ref):
@@ -867,7 +865,12 @@ def plot_movie(
             # params are xc, yc, a, b, theta
             ax_fit.plot(0, 0, marker="o")
             plot_ellipse_on_frame(
-                ax_fit, frame_id, ellipse, origin="reflection", dlc_res=dlc_res
+                ax_fit,
+                frame_id,
+                ellipse,
+                origin="reflection",
+                dlc_res=dlc_res,
+                reflection_fit=reflection_df,
             )
         # plot reprojection
         if plot_reproj:
@@ -896,7 +899,13 @@ def plot_movie(
 
 
 def plot_ellipse_on_frame(
-    ax, frame_id, ellipse, origin="reflection", left_bottom=None, dlc_res=None
+    ax,
+    frame_id,
+    ellipse,
+    origin="reflection",
+    left_bottom=None,
+    dlc_res=None,
+    reflection_fit=None,
 ):
     """Plot ellipse fit on a frame
 
@@ -910,15 +919,21 @@ def plot_ellipse_on_frame(
             origin="cropped". Defaults to None.
         dlc_res (pandas.DataFrame, optional): DLC results to use if origin="reflection".
             Defaults to None.
+        reflection_fit (np.array, optional): Reflection fit to use if
+            origin="reflection". Defaults to None.
+
 
     Returns:
         matplotlib.axes.Axes: Axes with plot
     """
     if origin == "reflection":
-        track = dlc_res.loc[frame_id]
-        track.index = track.index.droplevel(["scorer"])
-        xs = track.loc[("reflection", "x")]
-        ys = track.loc[("reflection", "y")]
+        if reflection_fit is None:
+            track = dlc_res.loc[frame_id]
+            track.index = track.index.droplevel(["scorer"])
+            xs = track.loc[("reflection", "x")]
+            ys = track.loc[("reflection", "y")]
+        else:
+            xs, ys = reflection_fit.loc[frame_id, ["x0", "y0"]]
     elif origin == "uncropped":
         xs, ys = 0, 0
     elif origin == "cropped":
@@ -992,3 +1007,39 @@ def plot_dlc_on_frame(
         track.loc[("reflection", "y")] - ys,
     )
     return ax
+
+
+def get_img_from_fig(fig):
+    """Get the array from a matplotlib figure
+
+    This is particularly useful to generate videos from matplotlib videos
+
+    Args:
+        fig (plt.Figure): figure handle
+
+    Returns:
+        image_from_plot (np.array): RGB image from figure
+
+    """
+    fig.canvas.draw()
+    image_from_plot = np.frombuffer(fig.canvas.buffer_rgba(), dtype=np.uint8)
+    image_from_plot = image_from_plot.reshape(
+        fig.canvas.get_width_height()[::-1] + (4,)
+    )
+    return image_from_plot
+
+
+def write_fig_to_video(fig, video_capture):
+    """Save the figure as last frame of an opened video capture
+
+    Use cv2.VideoCapture to create
+
+    Args:
+        fig (plt.figure): Matplotlib figure to save
+        video_capture (cv2.VideoCapture): video capture object, should be created with
+            relevant parameters (fps, codecs, etc...)
+    """
+    img_array = get_img_from_fig(fig)
+    # convert RGB to BGR for cv2
+    img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+    video_capture.write(img_array)

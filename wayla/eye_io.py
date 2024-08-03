@@ -85,11 +85,11 @@ def get_data(
     )
     ellipse["valid"] = valid
 
-    reflection = dlc_res.xs(axis="columns", level=1, key="reflection")
-    reflection.columns = reflection.columns.droplevel("scorer")
-    ellipse["reflection_x"] = reflection.x.values
-    ellipse["reflection_y"] = reflection.y.values
-    ellipse["reflection_likelihood"] = reflection_like.values
+    reflection = get_reflection(camera_ds=camera)
+    ellipse["reflection_x"] = reflection.x0.values
+    ellipse["reflection_y"] = reflection.y0.values
+    ellipse["reflection_dlc_likelihood"] = reflection_like.values
+    ellipse["reflection_residuals"] = reflection.res.values
     ellipse["pupil_x"] = ellipse.centre_x - ellipse.reflection_x
     ellipse["pupil_y"] = ellipse.centre_y - ellipse.reflection_y
     ellipse.loc[~ellipse.valid, "pupil_x"] = np.nan
@@ -103,9 +103,12 @@ def get_data(
         repro_ds = flz.Dataset.from_flexilims(
             name=repro_ds.iloc[0].name, flexilims_session=flexilims_session
         )
-        reprojection = np.load(repro_ds.path_full)
-        for i, prop in enumerate(["phi", "theta", "radius"]):
-            ellipse[prop] = reprojection[:, i]
+        if not repro_ds.path_full.exists():
+            print("Reprojection file not found")
+        else:
+            reprojection = np.load(repro_ds.path_full)
+            for i, prop in enumerate(["phi", "theta", "radius"]):
+                ellipse[prop] = reprojection[:, i]
     return dlc_res, ellipse, dlc_ds
 
 
@@ -148,3 +151,42 @@ def get_tracking_datasets(camera_ds, flexilims_session):
                 raise IOError("More than one uncropped dataset")
             ds_dict["uncropped"] = ds
     return ds_dict
+
+
+def get_reflection(
+    camera_ds_name=None, project=None, camera_ds=None, flexilims_session=None
+):
+    """Get reflection data from a camera dataset
+
+    Must have been processed with the eye_tracking.fit_ellipse first.
+
+    Args:
+        camera_ds_name (str, optional): Name of the camera dataset
+        project (str, optional): Project name
+        camera_ds (flexilims.Dataset, optional): Camera dataset. If None, will be
+            fetched from the database. Defaults to None.
+        flexilims_session (flexilims.Session, optional): Flexilims session. If None,
+            will be fetched from the database. Defaults to None.
+
+    Returns:
+        panda.DataFrame: Reflection data
+    """
+    if flexilims_session is None:
+        if camera_ds is not None:
+            flexilims_session = camera_ds.flexilims_session
+        else:
+            flexilims_session = flz.get_flexilims_session(project)
+    if camera_ds is None:
+        camera_ds = flz.Dataset.from_flexilims(
+            name=camera_ds_name, flexilims_session=flexilims_session
+        )
+    ds_dict = get_tracking_datasets(camera_ds, flexilims_session)
+    if ds_dict["cropped"] is None:
+        raise IOError("No cropped dataset found")
+    dlc_ds = ds_dict["cropped"]
+    dlc_file = dlc_ds.path_full / dlc_ds.extra_attributes["dlc_file"]
+    assert dlc_file.exists()
+    refl_fit = dlc_ds.path_full / f"{dlc_file.stem}_reflection_gaussian_fits.csv"
+    assert refl_fit.exists()
+    reflection = pd.read_csv(refl_fit)
+    return reflection

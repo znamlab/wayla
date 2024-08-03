@@ -18,7 +18,18 @@ from tqdm import tqdm
 from . import diagnostics, eye_io, utils
 
 
-def fit_gaussian_on_reflection(camera_ds, dlc_data=None, window=50, init_sigma=10):
+def fit_gaussian_on_reflection(camera_ds, dlc_data=None, window=50, init_sigma=100):
+    """Fit a gaussian on the reflection
+
+    Args:
+        camera_ds (flexiznam.schema.camera_data.CameraData): Camera dataset
+        dlc_data (pandas.DataFrame, optional): DLC data. Defaults to None.
+        window (int, optional): Window size. Defaults to 50.
+        init_sigma (int, optional): Initial sigma for the gaussian. Defaults to 100.
+
+    Returns:
+        pandas.DataFrame: Gaussian parameters
+    """
     flm_sess = camera_ds.flexilims_session
     if dlc_data is None:
         dlc_res, dlc_data, dlc_ds = eye_io.get_data(
@@ -51,7 +62,7 @@ def fit_gaussian_on_reflection(camera_ds, dlc_data=None, window=50, init_sigma=1
         y_lims = y_lims.astype(int)
 
         img_part = frame[y_lims[0] : y_lims[1], x_lims[0] : x_lims[1]]
-        return img_part
+        return img_part, x_lims, y_lims
 
     def gaussian_2d(xy, x0, y0, sigma, A):
         x, y = xy
@@ -77,7 +88,7 @@ def fit_gaussian_on_reflection(camera_ds, dlc_data=None, window=50, init_sigma=1
         ret, frame = video.read()
         assert ret, f"Failed to read frame {i_frame} from video file {video_file}"
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        img_part = crop_around_reflection(frame, track, crop_info, window=50)
+        img_part, xl, yl = crop_around_reflection(frame, track, crop_info, window=50)
         try:
             popt, pcov = curve_fit(
                 fit_gaussian_2d,
@@ -91,10 +102,12 @@ def fit_gaussian_on_reflection(camera_ds, dlc_data=None, window=50, init_sigma=1
             )
         except RuntimeError:
             popt = np.nan * np.zeros(4)
+        popt[:2] += [xl[0] - crop_info[0], yl[0] - crop_info[2]]
         gaussian_parameters[i_frame] = popt
         error[i_frame] = np.mean(
             np.abs(img_part.ravel() - fit_gaussian_2d((X, Y), *popt))
         )
+
     video.release()
 
     # to remember the order, make a dataframe
