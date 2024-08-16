@@ -508,7 +508,9 @@ def bin_ellipse_by_position(data, nbins=(25, 25)):
         numpy.array: Bin edges in x
         numpy.array: Bin edges in y
     """
-    elli = pd.DataFrame(data[data.valid], copy=True)
+    elli = pd.DataFrame(data[data.valid])
+    elli = elli[~np.isnan(elli.pupil_x)]
+    elli = elli[~np.isnan(elli.pupil_y)].copy()
     nbins = (25, 25)
     bin_edges_x = np.linspace(elli.pupil_x.min(), elli.pupil_x.max(), nbins[0])
     bin_edges_y = np.linspace(elli.pupil_y.min(), elli.pupil_y.max(), nbins[1])
