@@ -35,6 +35,7 @@ def fit_gaussian_on_reflection(camera_ds, dlc_data=None, window=50, init_sigma=1
         dlc_res, dlc_data, dlc_ds = eye_io.get_data(
             camera_ds,
             flexilims_session=flm_sess,
+            add_reflection_info=False,
         )
 
     dlc_tracks = eye_io.get_tracking_datasets(camera_ds, flexilims_session=flm_sess)

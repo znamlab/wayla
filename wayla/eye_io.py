@@ -11,6 +11,7 @@ def get_data(
     maximum_reflection_distance=50,
     error_threshold=None,
     ds_is_cropped=True,
+    add_reflection_info=True,
 ):
     """Get eye tracking data from camera dataset
 
@@ -29,6 +30,8 @@ def get_data(
             If None, use 5 sd. Defaults to None.
         ds_is_cropped (bool, optional): Whether the dataset is cropped. Defaults to
             True.
+        add_reflection_info (bool, optional): Whether to add reflection information to
+            the output. Defaults to True.
 
     Returns:
         panda.DataFrame: DLC results
@@ -67,6 +70,9 @@ def get_data(
     if error_threshold is None:
         error_threshold = np.nanmean(ellipse.error) + 5 * np.nanstd(ellipse.error)
 
+    if not add_reflection_info:
+        # return early, with just basic info
+        return dlc_res, ellipse, dlc_ds
     # add reflection distance
     reflection = dlc_res.xs("reflection", axis="columns", level=1)
     reflection.columns = reflection.columns.droplevel("scorer")
