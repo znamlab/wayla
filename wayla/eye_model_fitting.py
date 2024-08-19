@@ -551,7 +551,7 @@ def convert_to_world(gaze_vec, rvec):
     return rotated_gaze_vec
 
 
-def gaze_to_azel(gaze_vector, zero_median=False, world_is_mirrored=False):
+def gaze_to_azel(gaze_vector, zero_median=False, world_is_mirrored=False, verbose=True):
     """Transform gaze vectors in world coordinates to Azimuth and Elevation
 
     This assumes that the gaze vector come in the aruco reference frame , with y
@@ -566,13 +566,15 @@ def gaze_to_azel(gaze_vector, zero_median=False, world_is_mirrored=False):
         zero_median (bool, optional): Subtract the median. Defaults to False.
         world_is_mirrored (bool, optional): Whether the world is mirrored. Defaults to
             False.
+        verbose (bool, optional): Print progress. Defaults to True.
 
     Returns:
         azimuth (numpy.array): len(N) array of azimuth in radians in the range [-pi, pi]
         elevation (numpy.array): len(N) array of elevation in radians
     """
     if world_is_mirrored:
-        print("Mirrored world")
+        if verbose:
+            print("Mirrored world")
         gaze_vector[:, :2] *= -1
         gaze_vector = gaze_vector[:, [1, 0, 2]]
 
