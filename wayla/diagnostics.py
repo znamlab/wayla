@@ -906,6 +906,7 @@ def plot_ellipse_on_frame(
     left_bottom=None,
     dlc_res=None,
     reflection_fit=None,
+    **kwargs,
 ):
     """Plot ellipse fit on a frame
 
@@ -921,6 +922,7 @@ def plot_ellipse_on_frame(
             Defaults to None.
         reflection_fit (np.array, optional): Reflection fit to use if
             origin="reflection". Defaults to None.
+        **kwargs: Additional arguments to pass to plot
 
 
     Returns:
@@ -947,7 +949,7 @@ def plot_ellipse_on_frame(
         frame_id, ["centre_x", "centre_y", "major_radius", "minor_radius", "angle"]
     ]
     circ_coord = utils.predict_xy(np.arange(0, 2 * np.pi, 0.1), *params)
-    ax.plot(circ_coord[:, 0] - xs, circ_coord[:, 1] - ys)
+    ax.plot(circ_coord[:, 0] - xs, circ_coord[:, 1] - ys, **kwargs)
     return ax
 
 
