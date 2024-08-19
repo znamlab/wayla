@@ -112,6 +112,35 @@ def get_data(
     return dlc_res, ellipse, dlc_ds
 
 
+def get_eye_parameters(camera_ds, flexilims_session):
+    """Get eye parameters from a camera dataset
+
+    Args:
+        camera_ds (flexilims.Dataset): Camera dataset
+        flexilims_session (flexilims.Session): Flexilims session
+
+    Returns:
+        np.ndarray: Eye parameters
+    """
+    rec_ds = flz.get_children(
+        parent_id=camera_ds.origin_id,
+        flexilims_session=flexilims_session,
+        children_datatype="dataset",
+    )
+    repro_ds = rec_ds[rec_ds.dataset_type == "eye_reprojection"]
+    if not len(repro_ds):
+        raise IOError("No eye_reprojection dataset found")
+    if len(repro_ds) > 1:
+        raise IOError("More than one eye_reprojection dataset")
+    repro_ds = flz.Dataset.from_flexilims(
+        name=repro_ds.iloc[0].name, flexilims_session=flexilims_session
+    )
+    eye_param = repro_ds.path_full.with_name("eye_parameters.npz")
+    if not eye_param.exists():
+        raise IOError("Eye parameters not found")
+    return np.load(eye_param)
+
+
 def get_tracking_datasets(camera_ds, flexilims_session):
     """Get the dlc tracking datasets corresponding to a camera dataset
 
