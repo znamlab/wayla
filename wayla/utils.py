@@ -169,8 +169,8 @@ def minimise_reprojection_error(
 
     Returns:
         parameters (tuple): Best gaze parameters (phi, theta, radius)
-        min_ind (tuple): Index of minimal error in grid for (phi, theta, radius)
-        error (numpy array): len(grid_phi) x len(grid_theta) x len(grid_radius) array
+        error (float): Minimal reprojection error
+        errors (numpy array): len(grid_phi) x len(grid_theta) x len(grid_radius) array
             of reprojection errors
     """
     params = tuple(p0)
