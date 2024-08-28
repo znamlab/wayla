@@ -1,25 +1,14 @@
 API
 ===
 
-math
+eye_tracking
 ----
 
-.. currentmodule:: wayla.math
+.. currentmodule:: wayla.eye_tracking
 
 .. autosummary::
     :toctree: api_generated
     :template: function.rst
 
-    add_two_integers
+    run_all
     subtract_two_integers
-
-greetings
----------
-
-.. currentmodule:: wayla.greetings
-
-.. autosummary::
-    :toctree: api_generated
-    :template: class.rst
-
-    Greetings

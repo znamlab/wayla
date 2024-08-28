@@ -3,10 +3,25 @@ name = "wayla"
 authors = [{name = "Znamenskiy lab", email= "antonin.blot@crick.ac.uk"}]
 description = "What are you looking at, a gaze reconstruction package for mice"
 readme = "README.md"
-requires-python = ">=3.9.0"
+requires-python = ">=3.8.0"
 dynamic = ["version"]
 
-dependencies = []
+dependencies = ["numpy",
+        "pandas",
+        "pathlib",
+        "matplotlib",
+        "scipy",
+        "tables",
+        "scikit-learn",
+        "tqdm",
+        "numba",
+        "numba_progress",
+        "scikit-image",
+        "opencv-python",
+        "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git",
+        "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git",
+        "image_tools @ git+ssh://git@github.com/znamlab/image-tools.git",
+        ]
 
 license = {text = "MIT"}
 
@@ -67,7 +82,7 @@ filterwarnings = [
 [tool.black]
 target-version = ['py39', 'py310', 'py311']
 skip-string-normalization = false
-line-length = 79
+line-length = 88
 
 [tool.setuptools_scm]
 
@@ -84,9 +99,9 @@ ignore = [
 
 
 [tool.ruff]
-line-length = 79
+line-length = 88
 exclude = ["__init__.py","build",".eggs"]
-select = ["I", "E", "F"]
+lint.select = ["I", "E", "F"]
 fix = true
 
 [tool.tox]
