@@ -56,9 +56,10 @@ def get_data(
     )
     dlc_res = pd.read_hdf(dlc_ds.path_full / dlc_ds.extra_attributes["dlc_file"])
     # Get ellipse fits
-    ellipse_csv = list(dlc_ds.path_full.glob("*ellipse_fits.csv"))
-    assert len(ellipse_csv) == 1
-    ellipse = pd.read_csv(ellipse_csv[0])
+    ellipse_csv = dlc_ds.path_full / dlc_ds.extra_attributes["dlc_file"].replace(
+        ".h5", "_ellipse_fits.csv"
+    )
+    ellipse = pd.read_csv(ellipse_csv)
     # add dlc likelihood
     dlc_like = dlc_res.xs("likelihood", axis="columns", level=2)
     dlc_like.columns = dlc_like.columns.droplevel("scorer")
@@ -142,8 +143,6 @@ def get_eye_parameters(camera_ds, flexilims_session):
         name=repro_ds.iloc[0].name, flexilims_session=flexilims_session
     )
     eye_param = repro_ds.path_full.with_name("eye_parameters.npz")
-    if not eye_param.exists():
-        raise IOError("Eye parameters not found")
     return np.load(eye_param)
 
 
@@ -220,8 +219,7 @@ def get_reflection(
         raise IOError("No cropped dataset found")
     dlc_ds = ds_dict["cropped"]
     dlc_file = dlc_ds.path_full / dlc_ds.extra_attributes["dlc_file"]
-    assert dlc_file.exists()
+    pd.read_hdf(dlc_file)  # make sure it is a valid file that we can load
     refl_fit = dlc_ds.path_full / f"{dlc_file.stem}_reflection_gaussian_fits.csv"
-    assert refl_fit.exists()
     reflection = pd.read_csv(refl_fit)
     return reflection

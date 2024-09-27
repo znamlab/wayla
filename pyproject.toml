@@ -18,8 +18,8 @@ dependencies = ["numpy",
         "numba_progress",
         "scikit-image",
         "opencv-python",
-        "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git",
-        "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git",
+        "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git@v0.4",
+        "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git@v0.9",
         "image_tools @ git+ssh://git@github.com/znamlab/image-tools.git",
         ]
 
