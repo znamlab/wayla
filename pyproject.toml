@@ -18,12 +18,12 @@ dependencies = ["numpy",
         "numba_progress",
         "scikit-image",
         "opencv-python",
-        "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git@v0.4",
-        "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git@v0.9",
+        "flexiznam @ git+ssh://git@github.com/znamlab/flexiznam.git",
+        "znamutils @ git+ssh://git@github.com/znamlab/znamutils.git",
         "image_tools @ git+ssh://git@github.com/znamlab/image-tools.git",
         ]
 
-license = {text = "MIT"}
+license = "MIT"
 
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
@@ -33,7 +33,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent",
-    "License :: OSI Approved :: MIT License",
 ]
 
 [project.urls]
